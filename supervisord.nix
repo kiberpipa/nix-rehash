@@ -10,10 +10,6 @@ let
         default = "/";
         description = "Current directory when running the command";
       };
-      user = mkOption {
-        default = "root";
-        description = "The user to run the command as";
-      };
       environment = mkOption {
         default = {};
         example = {
@@ -59,7 +55,7 @@ in {
   config = mkIf config.supervisord.enable {
     supervisord.configFile = pkgs.writeText "supervisord.conf" ''
       [supervisord]
-      logfile=/var/log/supervisord/supervisord.log
+      logfile=/tmp/supervisor/var/log/supervisord/supervisord.log
 
       ${concatMapStrings (name:
         let
@@ -71,20 +67,23 @@ in {
           environment=${concatMapStrings (name: "${name}=\"${toString (getAttr name cfg.environment)}\",") (attrNames cfg.environment)}
           directory=${cfg.directory}
           redirect_stderr=true
-          stdout_logfile=/var/log/supervisord/${name}.log
-          user=${cfg.user}
+          stdout_logfile=/tmp/supervisor/var/log/supervisord/${name}.log
           startsecs=${toString cfg.startsecs}
           ''
         ) (attrNames services)
       }
     '';
 
-    docker.bootScript = ''
-      mkdir -p /var/log/supervisord
+    userNix.startScript = let
+      systemPackages = config.environment.systemPackages;
+      systemEnv = pkgs.buildEnv { name = "system-env"; paths = systemPackages; };
+    in ''
+      mkdir -p /tmp/supervisor/var/log/supervisord
+      export PATH="${systemEnv}/bin:${systemEnv}/sbin"
       ${pkgs.pythonPackages.supervisor}/bin/supervisord -c ${config.supervisord.configFile} ${if config.supervisord.tailLogs then ''
 
         sleep 2
-        touch /var/log/supervisord/test.log
+        touch $(pwd)/var/log/supervisord/test.log
         tail -n 100 -f /var/log/supervisord/*.log
       '' else "-n"}
     '';

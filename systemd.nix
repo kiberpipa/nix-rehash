@@ -9,11 +9,19 @@ let
 
   oneShotServices = filterAttrs (name: cfg: isOneShot cfg) services;
 
+  filterCommand = cmd:
+    let
+      filtered = substring 1 (stringLength cmd -2) cmd;
+      splitted = pkgs.lib.splitString " " filtered;
+    in if eqStrings (substring 0 1 cmd) "@" then
+        traceVal (head splitted) + concatStringsSep " " (drop 2 splitted)
+       else cmd;
+
   configToCommand = name: cfg: ''
       #!/bin/sh -e
       ${if hasAttr "preStart" cfg then cfg.preStart else ""}
       ${if hasAttr "ExecStart" cfg.serviceConfig then
-          cfg.serviceConfig.ExecStart
+          filterCommand cfg.serviceConfig.ExecStart
         else if hasAttr "script" cfg then
           cfg.script
         else
@@ -31,21 +39,21 @@ in {
   };
 
   config = {
-    docker.buildScripts."1-systemd-oneshot" = concatMapStrings (name: "${configToCommand name (getAttr name oneShotServices)}\n") (attrNames oneShotServices);
+    userNix.startScripts."1-systemd-oneshot" = concatMapStrings (name: "${configToCommand name (getAttr name oneShotServices)}\n") (attrNames oneShotServices);
 
     supervisord.services = listToAttrs (map (name:
       let
-        cfg = getAttr name runServices;
+        cfg = getAttr name services;
       in
         {
           name = name;
           value = {
             command = pkgs.writeScript "${name}-run" (configToCommand name cfg);
-            user = if hasAttr "User" cfg.serviceConfig then cfg.serviceConfig.User else "root";
             environment = (if hasAttr "environment" cfg then cfg.environment else {}) //
               (if hasAttr "path" cfg then
-                { PATH = concatStringsSep ":" (map (prg: "${prg}/bin") cfg.path); }
-               else {});
+                { PATH = "%(ENV_PATH)s:" + concatStringsSep ":" (map (prg: "${prg}/bin") cfg.path); }
+               else {
+               PATH="%(ENV_PATH)s"; });
           };
         }
       ) (attrNames runServices));
