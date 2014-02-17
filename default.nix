@@ -14,6 +14,7 @@ let
     <nixpkgs/nixos/modules/services/databases/redis.nix>
     <nixpkgs/nixos/modules/services/databases/mysql.nix>
     <nixpkgs/nixos/modules/services/databases/postgresql.nix>
+    <nixpkgs/nixos/modules/services/search/elasticsearch.nix>
     <nixpkgs/nixos/modules/testing/service-runner.nix>
   ];
 
@@ -24,19 +25,42 @@ let
 
   systemd = import ./systemd.nix { inherit pkgs config; };
 
-  startScript = pkgs.writeScript "build" ''
+  startServices = pkgs.writeScript "startServices" ''
     #!/bin/sh
+    export STATEDIR="${"\$"}{STATEDIR-$(pwd)/var}"
+
+    mkdir -p $STATEDIR/{run,log}
+
+    # Run start scripts first
     ${config.userNix.startScript}
+
+    # Run supervisord
+    ${pkgs.pythonPackages.supervisor}/bin/supervisord -c ${config.supervisord.configFile} -j $STATEDIR/run/supervisord.pid -d $STATEDIR -q $STATEDIR/log/ -l $STATEDIR/supervisord.log
   '';
 
+  stopServices = pkgs.writeScript "stopServices" ''
+    #!/bin/sh
+    ${pkgs.pythonPackages.supervisor}/bin/supervisorctl -c ${config.supervisord.configFile} shutdown
+  '';
+
+  controlServices = pkgs.writeScript "controlServices" ''
+    #!/bin/sh
+    ${pkgs.pythonPackages.supervisor}/bin/supervisorctl -c ${config.supervisord.configFile}
+  '';
+
+
 in pkgs.stdenv.mkDerivation {
-  inherit name;
+  name = "${name}-services";
   src = ./.;
 
   phases = [ "installPhase" ];
 
   installPhase = ''
-      mkdir -p $out/etc/start
-      ln -s ${startScript} $out/etc/start
+      ensureDir $out/bin/
+      ln -s ${startServices} $out/bin/${name}-start-services
+      ln -s ${stopServices} $out/bin/${name}-stop-services
+      ln -s ${controlServices} $out/bin/${name}-control-services
   '';
+
+  passthru.config = config;
 }

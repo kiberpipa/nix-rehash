@@ -16,6 +16,9 @@ let
           PATH = "/some/path";
         };
       };
+      stopsignal = mkOption {
+        default = "TERM";
+      };
       startsecs = mkOption {
         default = 1;
         example = 0;
@@ -55,7 +58,15 @@ in {
   config = mkIf config.supervisord.enable {
     supervisord.configFile = pkgs.writeText "supervisord.conf" ''
       [supervisord]
-      logfile=/tmp/supervisor/var/log/supervisord/supervisord.log
+
+      [supervisorctl]
+      serverurl = http://localhost:64125
+
+      [inet_http_server]
+      port = 127.0.0.1:64125
+
+      [rpcinterface:supervisor]
+      supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 
       ${concatMapStrings (name:
         let
@@ -67,25 +78,12 @@ in {
           environment=${concatMapStrings (name: "${name}=\"${toString (getAttr name cfg.environment)}\",") (attrNames cfg.environment)}
           directory=${cfg.directory}
           redirect_stderr=true
-          stdout_logfile=/tmp/supervisor/var/log/supervisord/${name}.log
           startsecs=${toString cfg.startsecs}
+          stopsignal=${cfg.stopsignal}
+          stopasgroup=true
           ''
         ) (attrNames services)
       }
-    '';
-
-    userNix.startScript = let
-      systemPackages = config.environment.systemPackages;
-      systemEnv = pkgs.buildEnv { name = "system-env"; paths = systemPackages; };
-    in ''
-      mkdir -p /tmp/supervisor/var/log/supervisord
-      export PATH="${systemEnv}/bin:${systemEnv}/sbin"
-      ${pkgs.pythonPackages.supervisor}/bin/supervisord -c ${config.supervisord.configFile} ${if config.supervisord.tailLogs then ''
-
-        sleep 2
-        touch $(pwd)/var/log/supervisord/test.log
-        tail -n 100 -f /var/log/supervisord/*.log
-      '' else "-n"}
     '';
   };
 }

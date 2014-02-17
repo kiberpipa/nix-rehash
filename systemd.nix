@@ -54,6 +54,9 @@ in {
                 { PATH = "%(ENV_PATH)s:" + concatStringsSep ":" (map (prg: "${prg}/bin") cfg.path); }
                else {
                PATH="%(ENV_PATH)s"; });
+            stopsignal = if hasAttr "KillSignal" cfg.serviceConfig then
+              substring 3 (stringLength cfg.serviceConfig.KillSignal) cfg.serviceConfig.KillSignal
+            else "TERM";
           };
         }
       ) (attrNames runServices));
