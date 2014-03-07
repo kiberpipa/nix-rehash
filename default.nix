@@ -53,19 +53,23 @@ let
     ${pkgs.pythonPackages.supervisor}/bin/supervisorctl -c ${config.supervisord.configFile}
   '';
 
+  servicesControl  = pkgs.stdenv.mkDerivation {
+    name = "${name}-servicesControl";
+    src = ./.;
 
-in pkgs.stdenv.mkDerivation {
+    phases = [ "installPhase" ];
+
+    installPhase = ''
+        ensureDir $out/bin/
+        ln -s ${startServices} $out/bin/${name}-start-services
+        ln -s ${stopServices} $out/bin/${name}-stop-services
+        ln -s ${controlServices} $out/bin/${name}-control-services
+    '';
+
+    passthru.config = config;
+  };
+
+in pkgs.buildEnv {
   name = "${name}-services";
-  src = ./.;
-
-  phases = [ "installPhase" ];
-
-  installPhase = ''
-      ensureDir $out/bin/
-      ln -s ${startServices} $out/bin/${name}-start-services
-      ln -s ${stopServices} $out/bin/${name}-stop-services
-      ln -s ${controlServices} $out/bin/${name}-control-services
-  '';
-
-  passthru.config = config;
+  paths = [ servicesControl ] ++ config.environment.systemPackages;
 }
