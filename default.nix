@@ -16,7 +16,10 @@ let
     <nixpkgs/nixos/modules/services/databases/mysql.nix>
     <nixpkgs/nixos/modules/services/databases/postgresql.nix>
     <nixpkgs/nixos/modules/services/search/elasticsearch.nix>
-    <nixpkgs/nixos/modules/testing/service-runner.nix>
+    <nixpkgs/nixos/modules/services/monitoring/graphite.nix>
+    <nixpkgs/nixos/modules/services/monitoring/statsd.nix>
+    <nixpkgs/nixos/modules/services/amqp/rabbitmq.nix>
+    <nixpkgs/nixos/modules/services/databases/couchdb.nix>
   ];
 
   config = (evalModules {
