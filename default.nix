@@ -40,7 +40,7 @@ let
     ${config.userNix.startScript}
 
     # Run supervisord
-    ${pkgs.pythonPackages.supervisor}/bin/supervisord -c ${config.supervisord.configFile} -j $STATEDIR/run/supervisord.pid -d $STATEDIR -q $STATEDIR/log/ -l $STATEDIR/supervisord.log
+    ${pkgs.pythonPackages.supervisor}/bin/supervisord -c ${config.supervisord.configFile} -j $STATEDIR/run/supervisord.pid -d $STATEDIR -q $STATEDIR/log/ -l $STATEDIR/log/supervisord.log
   '';
 
   stopServices = pkgs.writeScript "stopServices" ''
