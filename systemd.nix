@@ -1,5 +1,6 @@
 { pkgs, config, ... }:
-with pkgs.lib;
+  with pkgs.lib;
+  with import <nixpkgs/nixos/modules/system/boot/systemd-unit-options.nix> { inherit config pkgs; };
 let
   services = config.systemd.services;
 
@@ -35,6 +36,8 @@ in {
   options = {
     systemd.services = mkOption {
       default = {};
+      type = types.attrsOf types.optionSet;
+      options = [ serviceOptions ];
     }; # TODO make more specific
   };
 
