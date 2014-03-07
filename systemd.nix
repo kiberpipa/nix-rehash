@@ -13,7 +13,7 @@ let
   filterCommand = cmd:
     let
       filtered = substring 1 (stringLength cmd -2) cmd;
-      splitted = pkgs.lib.splitString " " filtered;
+      splitted = pkgs.lib.splitString (" " + substring 0 0 filtered) filtered;
     in if eqStrings (substring 0 1 cmd) "@" then
         traceVal (head splitted) + concatStringsSep " " (drop 2 splitted)
        else cmd;
