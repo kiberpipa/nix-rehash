@@ -28,6 +28,7 @@ let
   startServices = pkgs.writeScript "startServices" ''
     #!/bin/sh
     export STATEDIR="${"\$"}{STATEDIR-$(pwd)/var}"
+    export PATH="${pkgs.coreutils}/bin"
 
     mkdir -p $STATEDIR/{run,log}
 

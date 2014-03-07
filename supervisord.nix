@@ -16,6 +16,10 @@ let
           PATH = "/some/path";
         };
       };
+      path = mkOption {
+        default = [];
+        description = "Current directory when running the command";
+      };
       stopsignal = mkOption {
         default = "TERM";
       };
@@ -75,7 +79,13 @@ in {
           ''
           [program:${name}]
           command=${cfg.command}
-          environment=${concatMapStrings (name: "${name}=\"${toString (getAttr name cfg.environment)}\",") (attrNames cfg.environment)}
+          environment=${concatStrings
+            (mapAttrsToList (name: value: "${name}=\"${value}\",") (
+              cfg.environment // { PATH = concatStringsSep ":"
+                [("%(ENV_PATH)s") (cfg.path) (maybeAttr "PATH" "" cfg.environment)];
+              }
+            )
+          )}
           directory=${cfg.directory}
           redirect_stderr=true
           startsecs=${toString cfg.startsecs}
