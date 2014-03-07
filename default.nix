@@ -3,7 +3,8 @@
 , configuration ? [<configuration>]
 , baseImage ? "busybox"
 }:
-with pkgs.lib;
+  with pkgs.lib;
+
 let
   moduleList = [
     ./user.nix ./supervisord.nix ./systemd.nix ./environment.nix
