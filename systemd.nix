@@ -59,6 +59,6 @@ in {
             else "TERM";
           };
         }
-      ) (attrNames runServices));
+      ) (attrNames (filterAttrs (n: v: v.enable) runServices)));
   };
 }
