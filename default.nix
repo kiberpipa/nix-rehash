@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> { system = "x86_64-linux"; }
 , name
-, configuration ? <configuration>
+, configuration ? [<configuration>]
 , baseImage ? "busybox"
 }:
 with pkgs.lib;
@@ -19,7 +19,7 @@ let
   ];
 
   config = (evalModules {
-    modules = [configuration] ++ moduleList;
+    modules = configuration ++ moduleList;
     args = { inherit pkgs; };
   }).config;
 
