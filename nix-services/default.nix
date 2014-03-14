@@ -1,7 +1,7 @@
-{ pkgs ? import <nixpkgs> { system = "x86_64-linux"; }
+{ system ? builtins.currentSystem
+, pkgs ? import <nixpkgs> { inherit system; }
 , name
-, configuration ? [<configuration>]
-, baseImage ? "busybox"
+, configuration
 }:
   with pkgs.lib;
 
