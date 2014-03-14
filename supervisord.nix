@@ -27,6 +27,9 @@ let
         default = 1;
         example = 0;
       };
+      pidfile = mkOption {
+        default = null;
+      };
     };
   };
   services = config.supervisord.services;
@@ -78,7 +81,7 @@ in {
         in
           ''
           [program:${name}]
-          command=${cfg.command}
+          command=${if cfg.pidfile == null then cfg.command else "${pkgs.pythonPackages.supervisor}/bin/pidproxy ${cfg.pidfile} ${cfg.command}"}
           environment=${concatStrings
             (mapAttrsToList (name: value: "${name}=\"${value}\",") (
               cfg.environment // { PATH = concatStringsSep ":"

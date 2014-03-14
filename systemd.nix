@@ -57,6 +57,7 @@ in {
             stopsignal = if hasAttr "KillSignal" cfg.serviceConfig then
               substring 3 (stringLength cfg.serviceConfig.KillSignal) cfg.serviceConfig.KillSignal
             else "TERM";
+            pidfile = if hasAttr "PIDFile" cfg.serviceConfig then cfg.serviceConfig.PIDFile else null;
           };
         }
       ) (attrNames (filterAttrs (n: v: v.enable) runServices)));
