@@ -1,0 +1,3 @@
+{
+  buildServices = import ./nix-services;
+}
