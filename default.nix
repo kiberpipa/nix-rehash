@@ -1,3 +1,4 @@
 {
-  buildServices = import ./nix-services;
+  reService = import ./nix-services;
+  reContain = import ./containers.nix;
 }
