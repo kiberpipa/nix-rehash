@@ -9,7 +9,7 @@ Nix development utils that will blow up your mind
 reService - fullstack@dev
 --------------------------
 
-reService takes your nixos cofnig of services and creates user-enabled supervisord
+reService takes your nixos config of services and creates user-enabled supervisord
 config that you can use for development or deployment on non nixos systems.
 Having deterministic fullstack in development has never been more awesome.
 
