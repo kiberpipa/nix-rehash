@@ -39,6 +39,12 @@ in {
       type = types.attrsOf types.optionSet;
       options = [ serviceOptions ];
     }; # TODO make more specific
+
+    services.dataPrefix = mkOption {
+      default = "/var";
+      type = types.path;
+      description = '''';
+    };
   };
 
   config = {
