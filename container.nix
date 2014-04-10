@@ -84,6 +84,7 @@ let
       fi
       echo "Using $CONTAINER_ROOT as rootfs"
       mkdir -p $CONTAINER_ROOT/{proc,sys,dev,nix/store,etc}
+      mkdir -p /run/lxc/rootfs
       chmod 0755 $CONTAINER_ROOT/etc
       if ! [ -e $CONTAINER_ROOT/etc/os-release ]; then
         touch $CONTAINER_ROOT/etc/os-release
