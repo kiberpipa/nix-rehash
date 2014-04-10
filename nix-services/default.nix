@@ -1,5 +1,11 @@
 { system ? builtins.currentSystem
-, pkgs ? import <nixpkgs> { inherit system; }
+, pkgs ? import <nixpkgs> {
+  inherit system;
+  # Darwin needs a few packages overrides
+  config = if system == "x86_64-darwin" then {
+    packageOverrides = pkgs: { shadow = pkgs.hello; };
+  } else {};
+}
 , name
 , configuration
 }:
