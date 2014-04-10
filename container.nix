@@ -91,9 +91,6 @@ let
       fi
       rm $CONTAINER_ROOT/old_config && ln -fs "${container}" $CONTAINER_ROOT/old_config
       rm $CONTAINER_ROOT/new_config && ln -fs "${container}" $CONTAINER_ROOT/new_config
-      # Ugly hack that is used only on non nixos machines
-      chown root /nix/store/*-openssh-*/empty/
-      chown root /nix/store/*-sudo-*/libexec/sudo/sudoers.so
       ${pkgs.lxc}/bin/lxc-start -n "${name}" \
         -f "${pkgs.writeText "container.conf" containerConfig}" \
         -s lxc.rootfs=$CONTAINER_ROOT \
@@ -120,9 +117,6 @@ let
       if [ -z "$CONTAINER_ROOT" ]; then
           export CONTAINER_ROOT="/var/lib/containers/${name}"
       fi
-      # Ugly hack if you are running on
-      sudo chown root /nix/store/*-openssh-*/empty/
-      chown root /nix/store/*-sudo-*/libexec/sudo/sudoers.so
       rm $CONTAINER_ROOT/new_config && ln -fs ${container} $CONTAINER_ROOT/new_config
     '';
     executable = true;
