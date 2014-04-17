@@ -3,7 +3,12 @@
   inherit system;
   # Darwin needs a few packages overrides
   config = if system == "x86_64-darwin" then {
-    packageOverrides = pkgs: { shadow = pkgs.hello; };
+    packageOverrides = pkgs: {
+      shadow = pkgs.stdenv.mkDerivation {
+        name="shadow"; outputs=["out" "su"];
+        buildCommand="touch $out; touch $su";
+      };
+    };
   } else {};
 }
 , name
