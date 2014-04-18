@@ -1,6 +1,9 @@
 { pkgs, config, ... }:
   with pkgs.lib;
-  with import <nixpkgs/nixos/modules/system/boot/systemd-unit-options.nix> { inherit config pkgs; };
+  with import <nixpkgs/nixos/modules/system/boot/systemd-unit-options.nix> {
+    inherit config;
+    inherit (pkgs) lib;
+  };
 let
   services = config.systemd.services;
 
