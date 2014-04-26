@@ -26,11 +26,13 @@ let
     <nixpkgs/nixos/modules/services/databases/redis.nix>
     <nixpkgs/nixos/modules/services/databases/mysql.nix>
     <nixpkgs/nixos/modules/services/databases/postgresql.nix>
+    <nixpkgs/nixos/modules/services/databases/mongodb.nix>
+    <nixpkgs/nixos/modules/services/databases/couchdb.nix>
     <nixpkgs/nixos/modules/services/search/elasticsearch.nix>
     <nixpkgs/nixos/modules/services/monitoring/graphite.nix>
     <nixpkgs/nixos/modules/services/monitoring/statsd.nix>
     <nixpkgs/nixos/modules/services/amqp/rabbitmq.nix>
-    <nixpkgs/nixos/modules/services/databases/couchdb.nix>
+    <nixpkgs/nixos/modules/services/logging/logstash.nix>
   ];
 
   config = (evalModules {
