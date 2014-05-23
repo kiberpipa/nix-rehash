@@ -1,5 +1,6 @@
 { system ? builtins.currentSystem
 , pkgs ? import <nixpkgs> { inherit system; }
+, lxcExtraConfig ? ""
 , name
 , configuration
 }:
@@ -21,6 +22,7 @@ let
   container = (import <nixpkgs/nixos/lib/eval-config.nix> {
     modules =
       let extraConfig = {
+        nixpkgs.system = system;
         boot.isContainer = true;
         networking.hostName = mkDefault name;
         security.pam.services.sshd.startSession = mkOverride 50 false;
@@ -65,14 +67,16 @@ let
     lxc.cgroup.devices.allow = c 254:0 rwm
 
     ## Mounts
-    lxc.mount.auto = proc sys cgroup
     lxc.mount.entry = /nix/store nix/store none defaults,bind.ro 0.0
     lxc.autodev = 1
+
+    ${lxcExtraConfig}
 
     ## Network
     lxc.network.type = veth
     lxc.network.name = eth0
     lxc.network.flags = up
+
     '';
 
   startContainer = writeTextFile {
