@@ -93,8 +93,10 @@ let
       if ! [ -e $CONTAINER_ROOT/etc/os-release ]; then
         touch $CONTAINER_ROOT/etc/os-release
       fi
-      rm $CONTAINER_ROOT/old_config && ln -fs "${container}" $CONTAINER_ROOT/old_config
-      rm $CONTAINER_ROOT/new_config && ln -fs "${container}" $CONTAINER_ROOT/new_config
+      rm $CONTAINER_ROOT/old_config
+      ln -fs "${container}" $CONTAINER_ROOT/old_config
+      rm $CONTAINER_ROOT/new_config
+      ln -fs "${container}" $CONTAINER_ROOT/new_config
       ${pkgs.lxc}/bin/lxc-start -n "${name}" \
         -f "${pkgs.writeText "container.conf" containerConfig}" \
         -s lxc.rootfs=$CONTAINER_ROOT \
@@ -121,7 +123,8 @@ let
       if [ -z "$CONTAINER_ROOT" ]; then
           export CONTAINER_ROOT="/var/lib/containers/${name}"
       fi
-      rm $CONTAINER_ROOT/new_config && ln -fs ${container} $CONTAINER_ROOT/new_config
+      rm $CONTAINER_ROOT/new_config
+      ln -fs ${container} $CONTAINER_ROOT/new_config
     '';
     executable = true;
     destination = "/bin/${name}-container-update";
