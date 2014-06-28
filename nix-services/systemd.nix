@@ -30,8 +30,10 @@ let
           cfg.script
         else
           ""
-      }
+      } &
+      export MAINPID=$!
       ${if hasAttr "postStart" cfg then cfg.postStart else ""}
+      wait
       '';
 
 in {
