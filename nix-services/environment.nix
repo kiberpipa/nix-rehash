@@ -18,6 +18,6 @@ with pkgs.lib;
   };
 
   config = {
-    environment.systemPackages = with pkgs; [ coreutils ];
+    environment.systemPackages = with pkgs; [ ];
   };
 }

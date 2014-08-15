@@ -27,9 +27,9 @@ let
       ${if hasAttr "ExecStart" cfg.serviceConfig then
           filterCommand cfg.serviceConfig.ExecStart
         else if hasAttr "script" cfg then
-          cfg.script
+          (pkgs.writeScript "${name}-start.sh" cfg.script)
         else
-          ""
+          "echo"
       } &
       export MAINPID=$!
       ${if hasAttr "postStart" cfg then cfg.postStart else ""}
