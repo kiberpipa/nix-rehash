@@ -41,6 +41,11 @@ in {
         type = types.bool;
       };
 
+      port = mkOption {
+        default = 65123;
+        type = types.int;
+      };
+
       services = mkOption {
         default = {};
         type = types.loaOf types.optionSet;
@@ -67,10 +72,10 @@ in {
       [supervisord]
 
       [supervisorctl]
-      serverurl = http://localhost:64125
+      serverurl = http://localhost:${toString config.supervisord.port}
 
       [inet_http_server]
-      port = 127.0.0.1:64125
+      port = 127.0.0.1:${toString config.supervisord.port}
 
       [rpcinterface:supervisor]
       supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
