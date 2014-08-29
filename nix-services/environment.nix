@@ -15,6 +15,8 @@ with pkgs.lib;
     # HACK HACK
     system.activationScripts.etc = mkOption {}; # Ignore
     system.build.etc = mkOption {}; # Ignore
+    environment.etc = mkOption {}; # Ignore
+
   };
 
   config = {
