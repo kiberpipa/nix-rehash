@@ -31,6 +31,7 @@ let
     <nixpkgs/nixos/modules/services/databases/mongodb.nix>
     <nixpkgs/nixos/modules/services/databases/couchdb.nix>
     <nixpkgs/nixos/modules/services/databases/neo4j.nix> 
+    <nixpkgs/nixos/modules/services/databases/influxdb.nix> 
     <nixpkgs/nixos/modules/services/search/elasticsearch.nix>
     <nixpkgs/nixos/modules/services/monitoring/graphite.nix>
     <nixpkgs/nixos/modules/services/monitoring/statsd.nix>
