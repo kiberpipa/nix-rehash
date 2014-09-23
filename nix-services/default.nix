@@ -23,6 +23,8 @@ let
     <nixpkgs/nixos/modules/config/users-groups.nix>
     <nixpkgs/nixos/modules/misc/ids.nix>
     <nixpkgs/nixos/modules/misc/assertions.nix>
+    <nixpkgs/nixos/modules/config/timezone.nix>
+
     <nixpkgs/nixos/modules/services/databases/redis.nix>
     <nixpkgs/nixos/modules/services/databases/mysql.nix>
     <nixpkgs/nixos/modules/services/databases/postgresql.nix>
@@ -34,6 +36,7 @@ let
     <nixpkgs/nixos/modules/services/monitoring/statsd.nix>
     <nixpkgs/nixos/modules/services/amqp/rabbitmq.nix>
     <nixpkgs/nixos/modules/services/logging/logstash.nix>
+    #<nixpkgs/nixos/modules/services/misc/bitcoin.nix>
   ];
 
   config = (evalModules {

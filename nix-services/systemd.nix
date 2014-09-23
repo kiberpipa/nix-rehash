@@ -45,6 +45,10 @@ in {
       options = [ serviceOptions ];
     }; # TODO make more specific
 
+    systemd.globalEnvironment = mkOption {
+      default = {};
+    };
+
     services.dataPrefix = mkOption {
       default = "/var";
       type = types.path;
@@ -63,7 +67,7 @@ in {
           name = name;
           value = {
             command = pkgs.writeScript "${name}-run" (configToCommand name cfg);
-            environment = cfg.environment;
+            environment = cfg.environment // config.systemd.globalEnvironment;
             path = cfg.path;
             stopsignal = if hasAttr "KillSignal" cfg.serviceConfig then
               substring 3 (stringLength cfg.serviceConfig.KillSignal) cfg.serviceConfig.KillSignal

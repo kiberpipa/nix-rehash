@@ -16,6 +16,7 @@ with pkgs.lib;
     system.activationScripts.etc = mkOption {}; # Ignore
     system.build.etc = mkOption {}; # Ignore
     environment.etc = mkOption {}; # Ignore
+    environment.sessionVariables = mkOption {}; # Ignore
 
   };
 
