@@ -46,6 +46,11 @@ Having deterministic fullstack in development has never been more awesome.
 
 Now build this with hydra and pass the environment around :)
 
+Alternative using nix-shell:
+
+- set `buildInputs = [ services.config.supervisord.bin ];`
+- run `nix-shell`
+- use `supervisord` and `supervisorctl` as you wish
 
 reContain - heroku@home
 -----------------------
