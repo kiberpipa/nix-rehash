@@ -32,7 +32,35 @@ let
       };
     };
   };
+  
   services = config.supervisord.services;
+  
+  supervisor = config.supervisord.package;
+
+  supervisordWrapper = pkgs.writeScript "supervisord-wrapper" ''
+    #!${pkgs.stdenv.shell}
+    extraFlags=""
+    if [ -n "$STATEDIR" ]; then
+      extraFlags="-j $STATEDIR/run/supervisord.pid -d $STATEDIR -q $STATEDIR/log/ -l $STATEDIR/log/supervisord.log"
+      mkdir -p "$STATEDIR"/{run,log}
+    else
+      mkdir -p "${config.supervisord.stateDir}"/{run,log}
+    fi
+        
+    export PATH="${pkgs.coreutils}/bin"
+        
+    # Run start scripts first
+    ${config.userNix.startScript}
+        
+    # Run supervisord
+    ${supervisor}/bin/supervisord -c ${config.supervisord.configFile} $extraFlags $@
+  '';
+
+  supervisorctlWrapper = pkgs.writeScript "supervisorctl-wrapper" ''
+  	#!/usr/bin/env bash
+    ${supervisor}/bin/supervisorctl -c ${config.supervisord.configFile} $@
+  '';
+
 in {
   options = {
     supervisord = {
@@ -46,13 +74,29 @@ in {
         type = types.int;
       };
 
+      package = mkOption {
+        default = pkgs.pythonPackages.supervisor;
+        type = types.package;
+        description = ''
+          Supervisord package to use.
+        '';
+      };
+
       services = mkOption {
         default = {};
         type = types.loaOf types.optionSet;
         description = ''
-          Supervisord services to start
+          Supervisord services to start.
         '';
         options = [ serviceOpts ];
+      };
+
+      stateDir = mkOption {
+        default = "./var";
+        type = types.str;
+        description = ''
+          Supervisord state directory.
+        '';
       };
 
       tailLogs = mkOption {
@@ -63,13 +107,22 @@ in {
         '';
       };
 
-      configFile = mkOption {};
+      configFile = mkOption {
+        internal = true;
+      };
+
+      bin = mkOption {
+        internal = true;
+      };
     };
   };
 
   config = mkIf config.supervisord.enable {
     supervisord.configFile = pkgs.writeText "supervisord.conf" ''
       [supervisord]
+      pidfile=${config.supervisord.stateDir}/run/supervisord.pid
+      childlogdir=${config.supervisord.stateDir}/log/
+      logfile=${config.supervisord.stateDir}/log/supervisord.log
 
       [supervisorctl]
       serverurl = http://localhost:${toString config.supervisord.port}
@@ -86,7 +139,7 @@ in {
         in
           ''
           [program:${name}]
-          command=${if cfg.pidfile == null then cfg.command else "${pkgs.pythonPackages.supervisor}/bin/pidproxy ${cfg.pidfile} ${cfg.command}"}
+          command=${if cfg.pidfile == null then cfg.command else "${supervisor}/bin/pidproxy ${cfg.pidfile} ${cfg.command}"}
           environment=${concatStrings
             (mapAttrsToList (name: value: "${name}=\"${value}\",") (
               cfg.environment // { PATH = concatStringsSep ":"
@@ -103,5 +156,20 @@ in {
         ) (attrNames services)
       }
     '';
+
+    supervisord.bin = pkgs.stdenv.mkDerivation {
+      name = "${supervisor.name}-wrapper";
+
+      phases = [ "installPhase" ];
+
+      installPhase = ''
+        mkdir -p $out/bin/
+        ln -s -T ${supervisordWrapper} $out/bin/supervisord
+        ln -s -T ${supervisorctlWrapper} $out/bin/supervisorctl
+      '';
+
+    };
+
   };
 }
+  

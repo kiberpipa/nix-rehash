@@ -47,28 +47,9 @@ let
 
   systemd = import ./systemd.nix { inherit pkgs config; };
 
-  startServices = pkgs.writeScript "startServices" ''
-    #!/bin/sh
-    export STATEDIR="${"\$"}{STATEDIR-$(pwd)/var}"
-    export PATH="${pkgs.coreutils}/bin"
-
-    mkdir -p $STATEDIR/{run,log}
-
-    # Run start scripts first
-    ${config.userNix.startScript}
-
-    # Run supervisord
-    ${pkgs.pythonPackages.supervisor}/bin/supervisord -c ${config.supervisord.configFile} -j $STATEDIR/run/supervisord.pid -d $STATEDIR -q $STATEDIR/log/ -l $STATEDIR/log/supervisord.log
-  '';
-
   stopServices = pkgs.writeScript "stopServices" ''
-    #!/bin/sh
-    ${pkgs.pythonPackages.supervisor}/bin/supervisorctl -c ${config.supervisord.configFile} shutdown
-  '';
-
-  controlServices = pkgs.writeScript "controlServices" ''
-    #!/bin/sh
-    ${pkgs.pythonPackages.supervisor}/bin/supervisorctl -c ${config.supervisord.configFile}
+    #!${pkgs.stdenv.shell}
+    ${config.supervisord.bin}/bin/supervisorctl shutdown
   '';
 
   servicesControl  = pkgs.stdenv.mkDerivation {
@@ -78,10 +59,10 @@ let
     phases = [ "installPhase" ];
 
     installPhase = ''
-        ensureDir $out/bin/
-        ln -s ${startServices} $out/bin/${name}-start-services
+        mkdir -p $out/bin/
+        ln -s ${config.supervisord.bin}/bin/supervisord $out/bin/${name}-start-services
         ln -s ${stopServices} $out/bin/${name}-stop-services
-        ln -s ${controlServices} $out/bin/${name}-control-services
+        ln -s ${config.supervisord.bin}/bin/supervisorctl $out/bin/${name}-control-services
     '';
 
     passthru.config = config;
@@ -90,4 +71,6 @@ let
 in pkgs.buildEnv {
   name = "${name}-services";
   paths = [ servicesControl ] ++ config.environment.systemPackages;
+
+  inherit (servicesControl) passthru;
 }
