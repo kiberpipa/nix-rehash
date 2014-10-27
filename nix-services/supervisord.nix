@@ -136,6 +136,7 @@ in {
       ${concatMapStrings (name:
         let
           cfg = getAttr name services;
+		  path = if isList cfg.path then concatStringsSep ":" cfg.path else cfg.path;
         in
           ''
           [program:${name}]
@@ -143,7 +144,7 @@ in {
           environment=${concatStrings
             (mapAttrsToList (name: value: "${name}=\"${value}\",") (
               cfg.environment // { PATH = concatStringsSep ":"
-                [("%(ENV_PATH)s") (cfg.path) (maybeAttr "PATH" "" cfg.environment)];
+                [("%(ENV_PATH)s") (path) (maybeAttr "PATH" "" cfg.environment)];
               }
             )
           )}
