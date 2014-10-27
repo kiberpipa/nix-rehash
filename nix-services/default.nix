@@ -37,6 +37,7 @@ let
     <nixpkgs/nixos/modules/services/monitoring/statsd.nix>
     <nixpkgs/nixos/modules/services/amqp/rabbitmq.nix>
     <nixpkgs/nixos/modules/services/logging/logstash.nix>
+    <nixpkgs/nixos/modules/services/web-servers/nginx>
     #<nixpkgs/nixos/modules/services/misc/bitcoin.nix>
   ];
 
