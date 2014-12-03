@@ -50,15 +50,15 @@ let
     export PATH="${pkgs.coreutils}/bin"
         
     # Run start scripts first
-    ${config.userNix.startScript}
+    "${config.userNix.startScript}"
         
     # Run supervisord
-    ${supervisor}/bin/supervisord -c ${config.supervisord.configFile} $extraFlags $@
+    exec ${supervisor}/bin/supervisord -c "${config.supervisord.configFile}" $extraFlags "$@"
   '';
 
   supervisorctlWrapper = pkgs.writeScript "supervisorctl-wrapper" ''
-  	#!/usr/bin/env bash
-    ${supervisor}/bin/supervisorctl -c ${config.supervisord.configFile} $@
+    #!${pkgs.stdenv.shell}
+    exec ${supervisor}/bin/supervisorctl -c "${config.supervisord.configFile}" "$@"
   '';
 
 in {
@@ -136,7 +136,7 @@ in {
       ${concatMapStrings (name:
         let
           cfg = getAttr name services;
-		  path = if isList cfg.path then concatStringsSep ":" cfg.path else cfg.path;
+		      path = if isList cfg.path then concatStringsSep ":" cfg.path else cfg.path;
         in
           ''
           [program:${name}]
@@ -165,8 +165,8 @@ in {
 
       installPhase = ''
         mkdir -p $out/bin/
-        ln -s -T ${supervisordWrapper} $out/bin/supervisord
-        ln -s -T ${supervisorctlWrapper} $out/bin/supervisorctl
+        cp ${supervisordWrapper} $out/bin/supervisord
+        cp ${supervisorctlWrapper} $out/bin/supervisorctl
       '';
 
     };
